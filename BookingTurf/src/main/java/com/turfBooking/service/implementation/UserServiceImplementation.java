@@ -8,10 +8,12 @@ import com.turfBooking.enums.UserRole;
 import com.turfBooking.repository.UserRepository;
 import com.turfBooking.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +22,10 @@ public class UserServiceImplementation implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    // ADD THIS FOR JWT AUTHENTICATION
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
@@ -32,7 +38,8 @@ public class UserServiceImplementation implements UserService {
         User user = new User();
         user.setName(userRequestDTO.getName());
         user.setPhone(userRequestDTO.getPhone());
-        user.setPassword(userRequestDTO.getPassword()); // In real app, encode password
+        // ENCRYPT PASSWORD FOR SECURITY
+        user.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
         user.setRole(userRequestDTO.getRole());
 
         // Save user
@@ -79,7 +86,8 @@ public class UserServiceImplementation implements UserService {
         }
 
         if (userUpdateDTO.getPassword() != null && !userUpdateDTO.getPassword().trim().isEmpty()) {
-            user.setPassword(userUpdateDTO.getPassword()); // In real app, encode password
+            // ENCRYPT NEW PASSWORD
+            user.setPassword(passwordEncoder.encode(userUpdateDTO.getPassword()));
         }
 
         User updatedUser = userRepository.save(user);
@@ -155,6 +163,30 @@ public class UserServiceImplementation implements UserService {
     @Transactional(readOnly = true)
     public long getUsersCountByRole(UserRole role) {
         return userRepository.countByRole(role);
+    }
+
+    // JWT AUTHENTICATION SPECIFIC METHODS
+
+    /**
+     * Create user with encrypted password - used by AuthController
+     */
+    public User createUserEntity(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
+    }
+
+    /**
+     * Check if phone exists - used by AuthController
+     */
+    public boolean existsByPhone(String phone) {
+        return userRepository.existsByPhone(phone);
+    }
+
+    /**
+     * Find user by phone - used by CustomUserDetailsService
+     */
+    public Optional<User> findByPhone(String phone) {
+        return userRepository.findByPhone(phone);
     }
 
     // Helper method to convert User entity to basic UserResponseDTO

@@ -3,11 +3,15 @@ package com.turfBooking.service.interfaces;
 import com.turfBooking.dto.UserRequestDTO;
 import com.turfBooking.dto.UserResponseDTO;
 import com.turfBooking.dto.UserUpdateDTO;
+import com.turfBooking.entity.User;
 import com.turfBooking.enums.UserRole;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
+
+    // EXISTING METHODS - Keep all your current functionality
 
     // Create new user
     UserResponseDTO createUser(UserRequestDTO userRequestDTO);
@@ -47,4 +51,21 @@ public interface UserService {
 
     // Get users count by role
     long getUsersCountByRole(UserRole role);
+
+    // NEW JWT AUTHENTICATION METHODS - Add these to your interface
+
+    /**
+     * Create user entity with encrypted password - used by AuthController
+     */
+    User createUserEntity(User user);
+
+    /**
+     * Check if phone exists - used by AuthController
+     */
+    boolean existsByPhone(String phone);
+
+    /**
+     * Find user by phone - used by CustomUserDetailsService
+     */
+    Optional<User> findByPhone(String phone);
 }

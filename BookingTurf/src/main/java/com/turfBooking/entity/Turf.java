@@ -1,11 +1,13 @@
 package com.turfBooking.entity;
 
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
 import com.turfBooking.enums.SportType;
+
 
 @Entity
 @Table(name = "turfs")
